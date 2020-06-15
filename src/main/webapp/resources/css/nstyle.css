@@ -1,0 +1,19 @@
+table{
+	border-collapse: collapse;
+	width: 60%;
+}
+th{
+	background-color:  #d2d728;
+}
+th, td{
+	padding: 5px;
+	text-align: left;
+	border-bottom: 1px solid #ddd;
+}
+
+tr:hover {
+	background-color: #b7b1b8;
+}
+.left{
+	background-color: #eee;	
+}

@@ -1,0 +1,30 @@
+@charset "UTF-8";
+
+* {
+	margin: 0;
+	padding: 0;
+}
+
+.wrapper, .accordion, .panel, .panel-content {
+	float: left;
+	width: 100%;
+}
+
+.panel p {
+	margin: 0;
+	padding: 10px;
+	background: #0303;
+	margin-bottom: 10px;
+}
+
+.panel-content p {
+	margin: 0;
+	padding: 10px;
+	background: #08f90833;
+	margin-bottom: 10px;
+}
+
+.panel-content {
+	display: none;
+}
+/* Ashwani */

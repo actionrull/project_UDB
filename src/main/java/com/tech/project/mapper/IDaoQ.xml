@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tech.project.dao.IDaoQ">
+	
+	<sql id="includeCount">
+		<choose>
+			<when test="param2==1">
+			
+			</when>
+			<when test="param2==2">
+				 WHERE (QTYPE LIKE '%'||#{param1}||'%')
+			</when>
+			
+		</choose>
+	</sql>
+
+	<select id="selectCount" resultType="Integer">
+		SELECT COUNT(*) FROM QUESTION
+		<include refid="includeCount" />
+		
+	</select>
+	
+	<sql id="includeList">
+		<choose>
+			<when test="param4==1">
+			
+			</when>
+			<when test="param4==2">
+				 WHERE (QTYPE LIKE '%'||#{param3}||'%')
+			</when>
+		</choose>
+	</sql>
+
+	<select id="list" resultType="com.tech.project.dto.QuestionDto">
+		SELECT QNO,QTITLE,QWRITER,QCONTENT,QRCONTENT,QTYPE,QDATE,QHIT,
+		QGROUP,QSTEP,QINDENT,QMASTER FROM
+		(SELECT QNO,QTITLE,QWRITER,QCONTENT,QRCONTENT,QTYPE,QDATE,QHIT,
+		QGROUP,QSTEP,QINDENT,QMASTER,ROW_NUMBER()
+		OVER(ORDER BY QGROUP DESC,QSTEP ASC) Q_SEQ 
+		FROM QUESTION
+		<include refid="includeList" />
+		)
+		WHERE Q_SEQ BETWEEN #{param1} AND #{param2} 
+	</select>
+	
+	<insert id="write">
+		INSERT INTO QUESTION(QNO,QTITLE,QWRITER,QCONTENT,QRCONTENT,QTYPE,
+		QDATE,QHIT,QGROUP,QSTEP,QINDENT,QMASTER) VALUES(QUESTION_SEQ.NEXTVAL,
+		#{param1},#{param2},#{param3},NULL,#{param4},SYSDATE,0,
+		QUESTION_SEQ.CURRVAL,0,0,'0')
+	</insert>
+	
+	<update id="upHit">
+		UPDATE QUESTION SET QHIT=QHIT+1 WHERE QNO=#{param1}
+	</update>
+	
+	<select id="contentView" resultType="com.tech.project.dto.QuestionDto">
+		SELECT * FROM QUESTION WHERE QNO=#{param1}
+	</select>
+	
+	<select id="modifyView" resultType="com.tech.project.dto.QuestionDto">
+		SELECT * FROM QUESTION WHERE QNO=#{param1}
+	</select>
+	
+	<update id="modify">
+		UPDATE QUESTION SET QTITLE=#{param2},QCONTENT=#{param3} WHERE QNO=#{param1}
+	</update>
+	
+	<delete id="delete">
+		DELETE FROM QUESTION WHERE QNO=#{param1}
+	</delete>
+	
+	<select id="replyView" resultType="com.tech.project.dto.QuestionDto">
+		SELECT * FROM QUESTION WHERE QNO=#{param1}
+	</select>
+	
+	<update id="stepup">
+		UPDATE QUESTION SET QSTEP=QSTEP+1
+		WHERE (QGROUP=#{param1} AND QSTEP>#{param2})
+	</update>
+	
+	<insert id="reply">
+		INSERT INTO QUESTION(QNO,QTITLE,QWRITER,QCONTENT,QRCONTENT,QTYPE,QDATE,
+		QHIT,QGROUP,QSTEP,QINDENT,QMASTER) VALUES(QUESTION_SEQ.NEXTVAL,#{param8},'MASTER',#{param3},
+		#{param4},#{param2},SYSDATE,0,#{param5},#{param6}+1,#{param7}+1,'1')
+	</insert>
+	<!--  
+	QNO
+QTITLE
+QWRITER
+QCONTENT
+QRCONTENT
+QTYPE
+QDATE
+QHIT
+QGROUP
+QSTEP
+QINDENT
+QMASTER
+	-->
+</mapper>

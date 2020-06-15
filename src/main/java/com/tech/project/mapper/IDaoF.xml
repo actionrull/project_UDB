@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tech.project.dao.IDaoF">
+	<sql id="includeCount">
+		<choose>
+			<when test="param2==1">
+				WHERE (FTITLE LIKE '%'||#{param1}||'%')
+			</when>
+			<when test="param2==2">
+				WHERE (FCONTENT LIKE '%'||#{param1}||'%')
+			</when>
+			<when test="param2==3">
+				WHERE (FTITLE LIKE '%'||#{param1}||'%' OR FCONTENT LIKE '%'||#{param1}||'%')
+			</when>
+			<otherwise>
+			
+			</otherwise>
+		</choose>
+	</sql>
+	
+	<sql id="includeList">
+		<choose>
+			<when test="param4==1">
+                     WHERE (FTITLE LIKE '%'||#{param3}||'%')          
+			</when>
+			<when test="param4==2">
+                     WHERE (FCONTENT LIKE '%'||#{param3}||'%')        
+			</when>
+			<when test="param4==3">
+                     WHERE (FTITLE LIKE '%'||#{param3}||'%' or FCONTENT LIKE '%'||#{param3}||'%')         
+			</when>
+			<otherwise>
+				
+			</otherwise>
+			
+		</choose>
+    </sql>
+
+<select id="list" resultType="com.tech.project.dto.FreeDto">
+	 SELECT FNO,FTITLE,FWRITER,FCONTENT,FDATE,FHIT,
+	FGROUP,FSTEP,FINDENT,(SELECT COUNT(*) FROM FREE_REPLY R WHERE R.FNO=F.FNO)
+	AS REPLYCOUNT FROM
+	(SELECT FNO,FTITLE,FWRITER,FCONTENT,FDATE,FHIT,
+	FGROUP,FSTEP,FINDENT,ROW_NUMBER()
+	OVER(ORDER BY FGROUP DESC,FSTEP ASC) F_SEQ
+	FROM FREE
+	<include refid="includeList" />
+	) F
+	WHERE F_SEQ BETWEEN #{param1} AND #{param2}
+</select>
+
+<select id="selectSearchCount" resultType="Integer">
+	SELECT COUNT(*) FROM FREE
+	<include refid="includeCount" />
+</select> 
+
+
+<!--댓글 카운트  -->
+<select id="rCount" resultType="com.tech.project.dto.FreeDto">
+	SELECT F.*,(SELECT COUNT(*) FROM FREE_REPLY R WHERE R.FNO=F.FNO)
+	AS REPLYCOUNT FROM FREE F
+</select>
+
+
+
+
+<insert id="write">
+	INSERT INTO FREE(FNO,FTITLE,FWRITER,FCONTENT,FDATE,FHIT,FGROUP,
+						FSTEP,FINDENT,FILESRC) VALUES(FREE_SEQ.NEXTVAL,
+						#{param1},#{param2},#{param4},SYSDATE,0,
+						FREE_SEQ.CURRVAL,0,0,#{param3})
+
+</insert>
+
+<update id="upHit">
+	UPDATE FREE SET FHIT=FHIT+1 WHERE FNO=#{param1}
+</update>
+
+<select id="contentView" resultType="com.tech.project.dto.FreeDto">
+	SELECT * FROM FREE WHERE FNO=#{param1}
+</select>
+
+<select id="rcontentView" resultType="com.tech.project.dto.FreeReplyDto">
+	SELECT FRNO, FRCONTENT, FRWRITER, FRDATE
+  	FROM FREE_REPLY
+ 	WHERE FNO = #{param1}
+ 	ORDER BY FRDATE ASC
+</select>
+
+<insert id="rwrite">
+	INSERT INTO FREE_REPLY(FNO, FRNO, FRCONTENT, FRWRITER)
+    VALUES(#{param1}, FREE_REPLY_SEQ.NEXTVAL, #{param3},#{param2})
+</insert>
+
+<select id="modifyView" resultType="com.tech.project.dto.FreeDto">
+	SELECT * FROM FREE WHERE FNO=#{param1}
+</select>
+
+<update id="modify">
+	UPDATE FREE SET FTITLE=#{param2},FCONTENT=#{param3} WHERE FNO=#{param1}
+</update>
+
+<delete id="delete">
+	DELETE FROM FREE WHERE FNO=#{param1}
+</delete>
+
+<delete id="rdelete">
+	DELETE FROM FREE_REPLY WHERE FNO=#{param1 }
+</delete>
+
+<select id="replyView" resultType="com.tech.project.dto.FreeDto">
+	SELECT * FROM FREE WHERE FNO=#{param1}
+</select>
+
+<update id="stepup">
+	UPDATE FREE SET FSTEP=FSTEP+1
+	WHERE (FGROUP=#{param1} AND FSTEP>#{param2})
+</update>
+
+<update id="reply">
+	UPDATE FREE SET FREPLY=#{param2} WHERE FNO=#{param1}
+</update>
+<!-- FNO
+FTITLE
+FWRITER
+FCONTENT
+FDATE
+FHIT
+FGROUP
+FSTEP
+FINDENT
+FILESRC -->
+</mapper>

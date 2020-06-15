@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tech.project.dao.IDaoI">
+	<select id="selectInformCount" resultType="Integer">
+		SELECT COUNT(*) FROM INFORM
+	</select>
+	
+
+	<select id="list" resultType="com.tech.project.dto.InformDto">
+		SELECT INO,ITITLE,IWRITER,ICONTENT,IDATE,IHIT,IFILESRC,IMASTER 
+		FROM(SELECT INO,ITITLE,IWRITER,ICONTENT,IDATE,IHIT,IFILESRC,IMASTER,
+		ROW_NUMBER() OVER(ORDER BY IDATE DESC)I_SEQ FROM INFORM)
+		WHERE I_SEQ BETWEEN #{param1} AND #{param2}
+	</select>
+	
+
+
+
+	<insert id="write">
+		INSERT INTO INFORM(INO,ITITLE,IWRITER,ICONTENT,IDATE,IHIT,
+		IFILESRC,IMASTER) VALUES(INFORM_SEQ.NEXTVAL,#{param1},'MASTER',#{param2},
+		SYSDATE,0,#{param3},'0')
+	</insert>
+
+	
+	<update id="upHit">
+		UPDATE INFORM SET IHIT=IHIT+1 WHERE INO=#{param1}
+	</update>
+	
+	<select id="contentView" resultType="com.tech.project.dto.InformDto">
+		SELECT * FROM INFORM WHERE INO=#{param1} 
+	</select>
+	
+	<select id="modifyView" resultType="com.tech.project.dto.InformDto">
+		SELECT * FROM INFORM WHERE INO=#{param1}
+	</select>
+	
+	<update id="modify">
+		UPDATE INFORM SET ITITLE=#{param2},ICONTENT=#{param3} WHERE INO=#{param1}
+	</update>
+	
+	<delete id="delete">
+		DELETE FROM INFORM WHERE INO=#{param1}
+	</delete>
+</mapper>

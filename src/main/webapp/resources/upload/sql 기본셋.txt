@@ -1,0 +1,75 @@
+け mvc_board 包访
+
+create table mvc_board(
+bid number(4) primary key,
+bname varchar2(20),
+btitle varchar2(100),
+bcontent varchar2(300),
+bdate Date default sysdate,
+bhit number(4) default 0,
+bgroup number(4),
+bstep number(4),
+bindent number(4));
+----------------------------
+create SEQUENCE mvc_board_seq;
+----------------------------
+
+け notification 包访
+
+CREATE TABLE NOTIFICATION(
+NSEQ NUMBER,
+NTITLE VARCHAR2(100),
+NWRITER VARCHAR2(20),
+NCONTENT VARCHAR2(500),
+NREGDATE DATE,
+NDEADLINE DATE,
+NHIT NUMBER,
+NCATEGORY VARCHAR2(50),
+NGENDER VARCHAR2(20),
+NAGE VARCHAR2(20),
+NPT VARCHAR2(50),
+NPERIOD VARCHAR2(50),
+NWELFARE VARCHAR2(100),
+NLOCATION VARCHAR2(50),
+NDAY VARCHAR2(20),
+NTIME VARCHAR2(20),
+NRECEPTION VARCHAR2(20),
+NPAY NUMBER,
+NNEARSUB VARCHAR2(20),
+NMAPPOINT VARCHAR2(50),
+NPREMIUM VARCHAR2(10),
+NFILE VARCHAR2(20),
+NADDR VARCHAR2(100)
+);
+----------------------------
+CREATE SEQUENCE NOTIFICATION_NSEQ;
+----------------------------
+
+けhhhmember 包访
+
+create table hhhmember(
+hhhid varchar2(10) primary key,
+hhhpw varchar2(10),
+hhhnickname varchar2(20) unique,
+hhhemail varchar2(50),
+hhhemailhash varchar2(64),
+hhhemailchecked number
+);
+----------------------------
+け free 包访
+
+create table free(
+fno number(5) primary key,
+ftitle varchar2(100),
+fwriter varchar2(30),
+fcontent varchar2(400),
+fdate date default sysdate,
+fhit number(5) default 0,
+fgroup number(5),
+fstep number(5),
+findent number(5),
+filesrc varchar2(200),
+freply varchar2(200)
+);
+----------------------------
+create SEQUENCE free_seq;

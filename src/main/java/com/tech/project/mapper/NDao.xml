@@ -1,0 +1,450 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tech.project.dao.NDao">
+	<!--기업페이지 총 공고 수 -->
+	<select id="totalnoti_bymember" resultType="Integer">
+		SELECT COUNT(*) FROM NOTIFICATION WHERE MSID=#{param1 }
+	</select>
+	
+	<!--기업페이지 총 지원자 수 -->
+	<select id="totalapply_bymember" resultType="Integer">
+		SELECT COUNT(*) FROM (SELECT * FROM NOTIFICATION WHERE MSID=#{param1 }) A, APPLY WHERE A.NSEQ=APPLY.NSEQ 
+	</select>
+
+	<!--개인회원 지원현황 조회 -->
+	<select id="selectnseq"
+		resultType="com.tech.project.dto.ApplicationDto">
+		SELECT NSEQ FROM APPLY WHERE MSID=#{param1 }
+	</select>
+
+	<select id="applylist"
+		resultType="com.tech.project.dto.ApplicationDto">
+		SELECT NOTIFICATION.NTITLE, NOTIFICATION.NSEQ,
+		APPLY.APPDATE, APPLY.PASS FROM NOTIFICATION, APPLY
+		WHERE NOTIFICATION.NSEQ=#{param1 } AND APPLY.NSEQ=#{param1 }
+	</select>
+
+	<!--중복 지원 체크 -->
+	<select id="redundancy_check_apply" resultType="integer">
+		SELECT COUNT(*)
+		FROM APPLY WHERE MSID=#{param1 } AND NSEQ=#{param2 }
+	</select>
+
+	<!--지원하기 -->
+	<insert id="apply">
+		INSERT INTO APPLY(MSID, NSEQ, APPDATE, PASS,
+		R_CHECKED) VALUES(#{param1 }, #{param2 }, SYSDATE, '확인중', '0')
+	</insert>
+
+	<!--지원자 관리 공고 가져오기 -->
+	<select id="getnotice"
+		resultType="com.tech.project.dto.ApplicationDto">
+		SELECT * FROM NOTIFICATION WHERE MSID=#{param1 }
+	</select>
+
+	<!--지원자 합격 처리 -->
+	<update id="passapply">
+		UPDATE APPLY SET PASS='합격' WHERE NSEQ=#{param1 } AND
+		MSID=#{param2 }
+	</update>
+
+	<!--지원자 합격 처리 -->
+	<update id="failapply">
+		UPDATE APPLY SET PASS='불합격' WHERE NSEQ=#{param1 } AND
+		MSID=#{param2 }
+	</update>
+
+	<!--지원자 여부 체크 -->
+	<select id="getappcheck"
+		resultType="com.tech.project.dto.ApplicationDto">
+		SELECT MSID FROM APPLY WHERE NSEQ=#{param1 }
+	</select>
+
+	<!--지원자 이름 가져오기 -->
+	<select id="getmsname" resultType="String">
+		SELECT MSNAME FROM
+		MEMBER_SEEKER WHERE MSID=#{param1 }
+	</select>
+
+	<!--지원자 아이디,지원한 글 번호+글 제목 가져오기 -->
+	<select id="getapp" resultType="com.tech.project.dto.AppMngDto">
+		SELECT NTITLE, APPLY.MSID,
+		APPLY.NSEQ, APPLY.PASS FROM (SELECT * FROM NOTIFICATION WHERE MSID=#{param1 }) A, APPLY WHERE
+		A.NSEQ=APPLY.NSEQ
+	</select>
+
+	<!--공고삭제 -->
+	<delete id="delete">
+		DELETE FROM NOTIFICATION WHERE NSEQ=#{param1}
+	</delete>
+
+	<!-- 삭제할 파일명 불러오기 -->
+	<select id="getimgname" resultType="String">
+		SELECT NIMG FROM NOTIFICATION
+		WHERE NSEQ=#{param1}
+	</select>
+
+	<!--공고 등록 -->
+	<insert id="write">
+		INSERT INTO NOTIFICATION(NSEQ,NTITLE,NWRITER,NCONTENT,
+		NDEADLINE,NHIT,NCATEGORY,NGENDER,NAGE,NAG,NPERSONNEL,NPT,
+		NPERIOD,NWELFARE,NLOCATION,NDAY,NTIME,NRECEPTION,NTPAY,
+		NPAY,NNEARSUB,NPREMIUM,NADDR,LAT,LNG,NIMG,MSID)
+		VALUES(NOTIFICATION_NSEQ.NEXTVAL,#{param1},#{param11},#{param2},
+		#{param8},0,#{param9},#{param18},#{param19},#{param20},#{param7},#{param21},
+		#{param13},#{param10},#{param4},#{param14},#{param15},#{param12},#{param16},
+		#{param17},#{param5},0,#{param3},#{param22},#{param23},#{param6},#{param24})
+	</insert>
+
+	<!--공고 프리미엄 등록 -->
+	<insert id="write_premium">
+		INSERT INTO
+		NOTIFICATION(NSEQ,NTITLE,NWRITER,NCONTENT,
+		NDEADLINE,NHIT,NCATEGORY,NGENDER,NAGE,NAG,NPERSONNEL,NPT,
+		NPERIOD,NWELFARE,NLOCATION,NDAY,NTIME,NRECEPTION,NTPAY,
+		NPAY,NNEARSUB,NPREMIUM,NADDR,LAT,LNG,NIMG)
+		VALUES(NOTIFICATION_NSEQ.NEXTVAL,#{param1},#{param11},#{param2},
+		#{param8},0,#{param9},#{param18},#{param19},#{param20},#{param7},#{param21},
+		#{param13},#{param10},#{param4},#{param14},#{param15},#{param12},#{param16},
+		#{param17},#{param5},1,#{param3},#{param22},#{param23},#{param6})
+	</insert>
+
+	<!--공고 수정 페이지 -->
+	<select id="modify_view"
+		resultType="com.tech.project.dto.NoticeDto">
+		SELECT * FROM NOTIFICATION WHERE NSEQ=#{param1 }
+	</select>
+
+	<!--공고 수정 -->
+	<update id="modify">
+	UPDATE NOTIFICATION SET
+		NTITLE=#{param2},NWRITER=#{param12},NCONTENT=#{param3},
+		NDEADLINE=#{param9},NCATEGORY=#{param10},NGENDER=#{param19},NAGE=#{param20},
+		NAG=#{param21},NPERSONNEL=#{param8},NPT=#{param22},
+		NPERIOD=#{param14},NWELFARE=#{param11},NLOCATION=#{param5},NDAY=#{param15},
+		NTIME=#{param16},NRECEPTION=#{param13},NTPAY=#{param17},
+		NPAY=#{param18},NNEARSUB=#{param6},NADDR=#{param4},LAT=#{param23},
+		LNG=#{param24},NIMG=#{param7},NREGDATE=SYSDATE WHERE NSEQ=#{param1}
+	</update>
+
+	<!--공고 목록 등록일 내림차순 -->
+	<select id="list" resultType="com.tech.project.dto.NoticeDto">
+		SELECT
+		NSEQ,NLOCATION,NTITLE,NPAY,NTIME,NREGDATE,NCATEGORY,NADDR,NPERIOD,NDEADLINE,NDAY,NTPAY
+		FROM (SELECT
+		NSEQ,NLOCATION,NTITLE,NPAY,NTIME,NREGDATE,NCATEGORY,NADDR,NPERIOD,NDEADLINE,NDAY,NTPAY,ROW_NUMBER()
+		OVER(ORDER BY NREGDATE DESC) N_SEQ FROM NOTIFICATION)
+		WHERE N_SEQ
+		BETWEEN #{param1 } AND #{param2 }
+	</select>
+
+	<!--공고 목록 등록일 오름차순 -->
+	<select id="list2" resultType="com.tech.project.dto.NoticeDto">
+		SELECT
+		NSEQ,NLOCATION,NTITLE,NPAY,NTIME,NREGDATE,NCATEGORY,NADDR,NPERIOD,NDEADLINE,NDAY
+		FROM
+		(SELECT
+		NSEQ,NLOCATION,NTITLE,NPAY,NTIME,NREGDATE,NCATEGORY,NADDR,NPERIOD,NDEADLINE,NDAY,ROW_NUMBER()
+		OVER(ORDER BY NREGDATE ASC) N_SEQ FROM NOTIFICATION)
+		WHERE N_SEQ
+		BETWEEN #{param1 } AND #{param2 }
+	</select>
+
+	<!--공고 목록 시급 내림차순 -->
+	<select id="list3" resultType="com.tech.project.dto.NoticeDto">
+		SELECT
+		NSEQ,NLOCATION,NTITLE,NPAY,NTIME,NREGDATE,NCATEGORY,NADDR,NPERIOD,NDEADLINE,NDAY
+		FROM
+		(SELECT
+		NSEQ,NLOCATION,NTITLE,NPAY,NTIME,NREGDATE,NCATEGORY,NADDR,NPERIOD,NDEADLINE,NDAY,ROW_NUMBER()
+		OVER(ORDER BY NPAY DESC) N_SEQ FROM NOTIFICATION)
+		WHERE N_SEQ BETWEEN
+		#{param1 } AND #{param2 }
+	</select>
+
+	<!--공고 목록 시급 오름차순 -->
+	<select id="list4" resultType="com.tech.project.dto.NoticeDto">
+		SELECT
+		NSEQ,NLOCATION,NTITLE,NPAY,NTIME,NREGDATE,NCATEGORY,NADDR,NPERIOD,NDEADLINE,NDAY
+		FROM
+		(SELECT
+		NSEQ,NLOCATION,NTITLE,NPAY,NTIME,NREGDATE,NCATEGORY,NADDR,NPERIOD,NDEADLINE,NDAY,ROW_NUMBER()
+		OVER(ORDER BY NPAY ASC) N_SEQ FROM NOTIFICATION)
+		WHERE N_SEQ BETWEEN
+		#{param1 } AND #{param2 }
+	</select>
+
+	<!--총 공고 수 -->
+	<select id="selectBoardCount" resultType="integer">
+		SELECT COUNT(*) FROM
+		NOTIFICATION
+	</select>
+
+	<!--상세 페이지 보기 -->
+	<select id="content_view"
+		resultType="com.tech.project.dto.NoticeDto">
+		SELECT * FROM NOTIFICATION WHERE NSEQ=#{param1 }
+	</select>
+
+	<!--상세 페이지 조회수 증가 -->
+	<update id="uphit">
+		UPDATE NOTIFICATION SET NHIT=NHIT+1 WHERE
+		NSEQ=#{param1 }
+	</update>
+
+	<!--메인페이지 최신글란 -->
+	<select id="maincut" resultType="com.tech.project.dto.NoticeDto">
+		SELECT * FROM (SELECT * FROM NOTIFICATION ORDER BY NREGDATE DESC) <![CDATA[WHERE ROWNUM <=6 ]]>
+		ORDER BY NREGDATE DESC
+	</select>
+
+	<!--찜하기 -->
+	<insert id="pickitem">
+		INSERT INTO PICKLIST VALUES(#{param1 },#{param2 })
+	</insert>
+
+	<!--찜 중복확인 -->
+	<select id="redundancy_check"
+		resultType="com.tech.project.dto.NoticeDto">
+		SELECT NSEQ FROM PICKLIST WHERE MSID=#{param1 }
+	</select>
+
+	<!--찜 해제 -->
+	<delete id="deletepickitem">
+		DELETE FROM PICKLIST WHERE NSEQ=#{param1 }
+	</delete>
+
+	<!--마이페이지 찜 갯수 -->
+	<select id="totalpick" resultType="integer">
+		SELECT COUNT(*) FROM PICKLIST
+		WHERE MSID=#{param1 }
+	</select>
+
+	<!--마이페이지 찜 목록 -->
+	<select id="picklist"
+		resultType="com.tech.project.dto.NoticeDto">
+		SELECT * FROM NOTIFICATION WHERE NSEQ=#{param1 } ORDER BY
+		NREGDATE DESC
+	</select>
+
+	<!--이력서 업로드 -->
+	<insert id="resume_reg">
+		INSERT INTO RESUME VALUES(#{param1 },#{param2 },'1')
+	</insert>
+
+	<!--마이페이지 이력서 갯수 -->
+	<select id="totalresume" resultType="integer">
+		SELECT COUNT(*) FROM RESUME
+		WHERE MSID=#{param1 }
+	</select>
+
+	<!--이력서 다운로드 -->
+	<select id="resume_download" resultType="String">
+		SELECT RREF FROM RESUME
+		WHERE MSID=#{param1 }
+	</select>
+
+	<!--이력서 공개여부 -->
+	<select id="resume_open" resultType="String">
+		SELECT ROPEN FROM RESUME
+		WHERE MSID=#{param1 }
+	</select>
+
+	<!--이력서 공개로 전환 -->
+	<update id="resumeon">
+		UPDATE RESUME SET ROPEN='1' WHERE MSID=#{param1 }
+	</update>
+
+	<!--이력서 비공개로 전환 -->
+	<update id="resumeoff">
+		UPDATE RESUME SET ROPEN='0' WHERE MSID=#{param1 }
+	</update>
+
+	<!--이력서 등록여부 -->
+	<select id="resume_check" resultType="String">
+		SELECT RREF FROM RESUME
+		WHERE MSID=#{param1 }
+	</select>
+
+	<!--이력서 중복 시 삭제 -->
+	<delete id="resume_delete">
+		DELETE FROM RESUME WHERE MSID=#{param1 }
+	</delete>
+
+	<!--마이페이지 지원 수 -->
+	<select id="appcount" resultType="Integer">
+		SELECT COUNT(*) FROM APPLY
+		WHERE MSID=#{param1 }
+	</select>
+
+	<!--마이페이지 이력서 열람 갱신 -->
+	<update id="resume_novation">
+		UPDATE APPLY SET R_CHECKED='1' WHERE MSID=#{param1 }
+		AND NSEQ=#{param2 }
+	</update>
+
+	<!--마이페이지 이력서 열람 기업 수 -->
+	<select id="recount" resultType="Integer">
+		SELECT COUNT(*) FROM APPLY WHERE
+		MSID=#{param1 } AND R_CHECKED='1'
+	</select>
+	<!--마이페이지 입사지원 요청 수 -->
+	<select id="getconfirm" resultType="Integer">
+		SELECT COUNT(*) FROM APPLY
+		WHERE MSID=#{param1 } AND PASS='합격'
+	</select>
+
+	<!--상세검색 검색 결과 수 -->
+	<select id="detailSearchCount" resultType="Integer"> SELECT COUNT(*) FROM
+		NOTIFICATION WHERE (NLOCATION LIKE '%'||#{param1}||'%' AND NCATEGORY
+		LIKE '%'||#{param2}||'%' AND NPERIOD LIKE '%'||#{param3}||'%' AND NDAY
+		LIKE '%'||#{param4}||'%' AND NTIME LIKE '%'||#{param5}||'%' AND NTPAY
+		LIKE '%'||#{param6}||'%' AND NPAY >#{param7} AND NWELFARE LIKE
+		'%'||#{param8}||'%' AND NGENDER LIKE '%'||#{param9}||'%' AND NAGE LIKE
+		'%'||#{param10}||'%' AND NAG LIKE '%'||#{param11}||'%') </select>
+
+	<select id="DetailSearchList"
+		resultType="com.tech.project.dto.NoticeDto"> SELECT
+		NSEQ,NLOCATION,NTITLE,NPAY,NTIME,NREGDATE,NCATEGORY,NADDR,NPERIOD,NDEADLINE,NDAY,NTPAY
+		FROM (SELECT
+		NSEQ,NLOCATION,NTITLE,NPAY,NTIME,NREGDATE,NCATEGORY,NADDR,NPERIOD,NDEADLINE,NDAY,NTPAY,ROW_NUMBER()
+		OVER(ORDER BY NREGDATE DESC) N_SEQ FROM NOTIFICATION WHERE (NLOCATION
+		LIKE '%'||#{param1}||'%' AND NCATEGORY LIKE '%'||#{param2}||'%' AND
+		NPERIOD LIKE '%'||#{param3}||'%' AND NDAY LIKE '%'||#{param4}||'%' AND
+		NTIME LIKE '%'||#{param5}||'%' AND NTPAY LIKE '%'||#{param6}||'%' AND <![CDATA[
+		NPAY >= #{param7}]]> AND NWELFARE LIKE '%'||#{param8}||'%' AND NGENDER LIKE
+		'%'||#{param9}||'%' AND NAGE LIKE '%'||#{param10}||'%' AND NAG LIKE
+		'%'||#{param11}||'%')) WHERE N_SEQ BETWEEN #{param12} AND #{param13}
+	</select>
+
+	<select id="DetailSearchList2"
+		resultType="com.tech.project.dto.NoticeDto"> SELECT
+		NSEQ,NLOCATION,NTITLE,NPAY,NTIME,NREGDATE,NCATEGORY,NADDR,NPERIOD,NDEADLINE,NDAY,NTPAY
+		FROM (SELECT
+		NSEQ,NLOCATION,NTITLE,NPAY,NTIME,NREGDATE,NCATEGORY,NADDR,NPERIOD,NDEADLINE,NDAY,NTPAY,ROW_NUMBER()
+		OVER(ORDER BY NREGDATE ASC) N_SEQ FROM NOTIFICATION WHERE (NLOCATION
+		LIKE '%'||#{param1}||'%' AND NCATEGORY LIKE '%'||#{param2}||'%' AND
+		NPERIOD LIKE '%'||#{param3}||'%' AND NDAY LIKE '%'||#{param4}||'%' AND
+		NTIME LIKE '%'||#{param5}||'%' AND NTPAY LIKE '%'||#{param6}||'%' AND
+		NPAY >= #{param7} AND NWELFARE LIKE '%'||#{param8}||'%' AND NGENDER LIKE
+		'%'||#{param9}||'%' AND NAGE LIKE '%'||#{param10}||'%' AND NAG LIKE
+		'%'||#{param11}||'%')) WHERE N_SEQ BETWEEN #{param12} AND #{param13}
+	</select>
+
+	<!-- <select id="DetailSearchList3"
+		resultType="com.tech.project.dto.NoticeDto"> SELECT
+		NSEQ,NLOCATION,NTITLE,NPAY,NTIME,NREGDATE,NCATEGORY,NADDR,NPERIOD,NDEADLINE,NDAY
+		FROM (SELECT
+		NSEQ,NLOCATION,NTITLE,NPAY,NTIME,NREGDATE,NCATEGORY,NADDR,NPERIOD,NDEADLINE,NDAY,ROW_NUMBER()
+		OVER(ORDER BY NPAY DESC) N_SEQ FROM NOTIFICATION WHERE (NLOCATION LIKE
+		'%'||#{param1}||'%' AND NCATEGORY LIKE '%'||#{param2}||'%' AND NPERIOD
+		LIKE '%'||#{param3}||'%' AND NDAY LIKE '%'||#{param4}||'%' AND NTIME
+		LIKE '%'||#{param5}||'%' AND NTPAY LIKE '%'||#{param6}||'%' AND NPAY
+		>= #{param7} AND NWELFARE LIKE '%'||#{param8}||'%' AND NGENDER LIKE
+		'%'||#{param9}||'%' AND NAGE LIKE '%'||#{param10}||'%' AND NAG LIKE
+		'%'||#{param11}||'%')) WHERE N_SEQ BETWEEN #{param12} AND #{param13}
+	</select>
+
+	<select id="DetailSearchList4"
+		resultType="com.tech.project.dto.NoticeDto"> SELECT
+		NSEQ,NLOCATION,NTITLE,NPAY,NTIME,NREGDATE,NCATEGORY,NADDR,NPERIOD,NDEADLINE,NDAY
+		FROM (SELECT
+		NSEQ,NLOCATION,NTITLE,NPAY,NTIME,NREGDATE,NCATEGORY,NADDR,NPERIOD,NDEADLINE,NDAY,ROW_NUMBER()
+		OVER(ORDER BY NPAY ASC) N_SEQ FROM NOTIFICATION WHERE (NLOCATION LIKE
+		'%'||#{param1}||'%' AND NCATEGORY LIKE '%'||#{param2}||'%' AND NPERIOD
+		LIKE '%'||#{param3}||'%' AND NDAY LIKE '%'||#{param4}||'%' AND NTIME
+		LIKE '%'||#{param5}||'%' AND NTPAY LIKE '%'||#{param6}||'%' AND NPAY
+		>= #{param7} AND NWELFARE LIKE '%'||#{param8}||'%' AND NGENDER LIKE
+		'%'||#{param9}||'%' AND NAGE LIKE '%'||#{param10}||'%' AND NAG LIKE
+		'%'||#{param11}||'%')) WHERE N_SEQ BETWEEN #{param12} AND #{param13}
+	</select> -->
+
+	<!-- 공고 갯수 -->
+	<select id="totalnoti" resultType="integer">
+		SELECT COUNT(*) FROM
+		NOTIFICATION
+		WHERE MSID=#{param1 }
+	</select>
+
+	<!--공고 공개여부 -->
+	<select id="noti_open"
+		resultType="com.tech.project.dto.NoticeDto">
+		SELECT NOPEN FROM NOTIFICATION
+		WHERE MSID=#{param1 }
+	</select>
+
+	<!-- 공고 공개전환 -->
+	<update id="notion">
+		UPDATE NOTIFICATION SET NOPEN='1' WHERE MSID=#{param1
+		}
+	</update>
+
+	<!--공고 비공개로 전환 -->
+	<update id="notioff">
+		UPDATE NOTIFICATION SET NOPEN='0' WHERE MSID=#{param1
+		}
+	</update>
+
+	<!--공고 등록여부 -->
+	<select id="noti_check"
+		resultType="com.tech.project.dto.NoticeDto">
+		SELECT NSEQ FROM NOTIFICATION
+		WHERE MSID=#{param1 }
+	</select>
+
+	<!--공고 목록 -->
+	<select id="nmanage" resultType="com.tech.project.dto.NoticeDto">
+		SELECT NSEQ,NTITLE,NREGDATE,NPREMIUM FROM
+		NOTIFICATION
+		WHERE MSID=#{param1} ORDER BY NSEQ DESC
+	</select>
+
+	<!--공고 프리미엄 등록 -->
+	<update id="getpremium">
+		UPDATE NOTIFICATION SET NPREMIUM='1' WHERE
+		NSEQ=#{param1 }
+	</update>
+
+	<select id="mainSearchCount" resultType="Integer"> SELECT COUNT(*) FROM
+		NOTIFICATION WHERE NCATEGORY LIKE '%'||#{param1}||'%' </select>
+
+	<select id="MainSearchList"
+		resultType="com.tech.project.dto.NoticeDto"> SELECT
+		NSEQ,NLOCATION,NTITLE,NPAY,NTIME,NREGDATE,NCATEGORY,NADDR,NPERIOD,NDEADLINE,NDAY
+		FROM (SELECT
+		NSEQ,NLOCATION,NTITLE,NPAY,NTIME,NREGDATE,NCATEGORY,NADDR,NPERIOD,NDEADLINE,NDAY,
+		ROW_NUMBER() OVER(ORDER BY NREGDATE DESC) N_SEQ FROM NOTIFICATION
+		WHERE NCATEGORY LIKE '%'||#{param1}||'%') WHERE N_SEQ BETWEEN
+		#{param2} AND #{param3} </select>
+
+	<select id="MainSearchList2"
+		resultType="com.tech.project.dto.NoticeDto"> SELECT
+		NSEQ,NLOCATION,NTITLE,NPAY,NTIME,NREGDATE,NCATEGORY,NADDR,NPERIOD,NDEADLINE,NDAY
+		FROM (SELECT
+		NSEQ,NLOCATION,NTITLE,NPAY,NTIME,NREGDATE,NCATEGORY,NADDR,NPERIOD,NDEADLINE,NDAY,
+		ROW_NUMBER() OVER(ORDER BY NREGDATE ASC) N_SEQ FROM NOTIFICATION WHERE
+		NCATEGORY LIKE '%'||#{param1}||'%') WHERE N_SEQ BETWEEN #{param2} AND
+		#{param3} </select>
+
+	<select id="MainSearchList3"
+		resultType="com.tech.project.dto.NoticeDto"> SELECT
+		NSEQ,NLOCATION,NTITLE,NPAY,NTIME,NREGDATE,NCATEGORY,NADDR,NPERIOD,NDEADLINE,NDAY
+		FROM (SELECT
+		NSEQ,NLOCATION,NTITLE,NPAY,NTIME,NREGDATE,NCATEGORY,NADDR,NPERIOD,NDEADLINE,NDAY,
+		ROW_NUMBER() OVER(ORDER BY NPAY DESC) N_SEQ FROM NOTIFICATION WHERE
+		NCATEGORY LIKE '%'||#{param1}||'%') WHERE N_SEQ BETWEEN #{param2} AND
+		#{param3} </select>
+
+	<select id="MainSearchList4"
+		resultType="com.tech.project.dto.NoticeDto"> SELECT
+		NSEQ,NLOCATION,NTITLE,NPAY,NTIME,NREGDATE,NCATEGORY,NADDR,NPERIOD,NDEADLINE,NDAY
+		FROM (SELECT
+		NSEQ,NLOCATION,NTITLE,NPAY,NTIME,NREGDATE,NCATEGORY,NADDR,NPERIOD,NDEADLINE,NDAY,
+		ROW_NUMBER() OVER(ORDER BY NPAY ASC) N_SEQ FROM NOTIFICATION WHERE
+		NCATEGORY LIKE '%'||#{param1}||'%') WHERE N_SEQ BETWEEN #{param2} AND
+		#{param3} </select>
+</mapper>

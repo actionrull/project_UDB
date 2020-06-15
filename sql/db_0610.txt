@@ -1,0 +1,204 @@
+--공고 목록
+
+CREATE TABLE NOTIFICATION(
+NSEQ NUMBER PRIMARY KEY,
+NTITLE VARCHAR2(100),
+NWRITER VARCHAR2(20),
+NCONTENT VARCHAR2(500),
+NREGDATE DATE DEFAULT SYSDATE,
+NDEADLINE VARCHAR2(20),
+NHIT NUMBER,
+NCATEGORY VARCHAR2(50),
+NGENDER VARCHAR2(20),
+NAGE VARCHAR2(20),
+NAG VARCHAR2(20),
+NPERSONNEL VARCHAR2(20),
+NPT VARCHAR2(50),
+NPERIOD VARCHAR2(50),
+NWELFARE VARCHAR2(100),
+NLOCATION VARCHAR2(50),
+NDAY VARCHAR2(20),
+NTIME VARCHAR2(40),
+NRECEPTION VARCHAR2(20),
+NTPAY VARCHAR2(10),
+NPAY NUMBER,
+NNEARSUB VARCHAR2(20),
+NPREMIUM VARCHAR2(10),
+NADDR VARCHAR2(100),
+LAT varchar2(100),
+LNG varchar2(100),
+MSID VARCHAR2(100),
+NIMG VARCHAR2(100)
+);
+
+--공고 시퀀스
+
+CREATE SEQUENCE NOTIFICATION_NSEQ;
+
+--찜한목록(모집공고 상속)
+
+CREATE TABLE PICKLIST(
+MSID VARCHAR2(20),
+NSEQ NUMBER
+);
+
+--찜한목록 상속
+
+ALTER TABLE PICKLIST ADD FOREIGN KEY (MSID) REFERENCES MEMBER_SEEKER(MSID) on delete set null;
+
+--이력서
+
+CREATE TABLE RESUME(
+MSID VARCHAR2(20),
+RREF VARCHAR2(500),
+ROPEN VARCHAR2(10),
+);
+
+--지원
+
+CREATE TABLE APPLY(
+MSID VARCHAR2(20),
+NSEQ NUMBER
+APPDATE DATE
+PASS VARCHAR2(10)
+R_CHECKED VARHCAR2(10)
+);
+
+--지원 상속
+ALTER TABLE APPLY ADD FOREIGN KEY (MSID) REFERENCES MEMBER_SEEKER(MSID) on delete set null;
+
+ALTER TABLE APPLY ADD FOREIGN KEY (NSEQ) REFERENCES NOTIFICATION(NSEQ) on delete set null;
+
+--알바후기 
+
+create table free(
+fno number(5) primary key,
+ftitle varchar2(100),
+fwriter varchar2(30),
+fcontent varchar2(400),
+fdate date default sysdate,
+fhit number(5) default 0,
+fgroup number(5),
+fstep number(5),
+findent number(5)
+filesrc varchar2(200)
+);
+
+--알바후기 시퀀스
+
+create SEQUENCE free_seq;
+
+--알바후기 더미데이터
+
+insert into free 
+values(free_seq.nextval,'후기','작성자','내용',
+sysdate,0,free_seq.currval,0,0,NULL);
+
+
+--알바후기 댓글 
+
+create table free_reply(
+fno number,
+frno number,
+frcontent varchar2(500),
+frwriter varchar2(50),
+frdate date default sysdate,
+primary key(fno,frno)
+);
+
+--알바후기 댓글 상속
+
+alter table free_reply add constraint free_reply_fno foreign key(fno)
+references free(fno);
+
+--알바후기 시퀀스
+
+create sequence free_reply_seq START WITH 1 MINVALUE 0;
+
+--알바후기 더미데이터
+
+insert into free_reply(fno, frno, frcontent, frwriter)
+    values(2, free_reply_seq.nextval, '테스트댓글', '테스트 작성자');
+
+insert into free_reply(fno, frno, frcontent, frwriter)
+    values(2, free_reply_seq.nextval, '테스트댓글2', '테스트 작성자2');    
+
+insert into free_reply(fno, frno, frcontent, frwriter)
+    values(2, free_reply_seq.nextval, '테스트댓글3', '테스트 작성자3');    
+    
+
+
+--공지사항 
+
+create table inform(
+ino number(5) primary key,
+ititle varchar2(100),
+iwriter varchar2(50),
+icontent varchar2(400),
+idate date default sysdate,
+ihit number(5) default 0,
+ifilesrc varchar2(300),
+imaster varchar2(10)
+);
+
+--공지사항 시퀀스
+
+create SEQUENCE inform_seq;
+
+--공지사항 더미 데이터
+
+insert into inform 
+values(free_seq.nextval,'제목2','작성자2','내용2',
+sysdate,0,'파일2','1');
+
+
+--문의게시판
+
+create table question(
+qno number(5) primary key,
+qtitle varchar2(100),
+qwriter varchar2(30),
+qcontent varchar2(400),
+qrcontent varchar2(400),
+qtype varchar(100),
+qdate date default sysdate,
+qhit number(5) default 0,
+qgroup number(5),
+qstep number(5),
+qindent number(5),
+qmaster varchar2(20)
+);
+
+--문의게시판 시퀀스
+
+create sequence question_seq;
+
+--문의게시판 더미 데이터
+
+insert into question 
+values(question_seq.nextval,'제목 문의','작성자','내용',null,'modify',sysdate,0,question_seq.currval,0,0,0);
+
+--개인회원 테이블
+
+create table MEMBER_SEEKER(
+msno number PRIMARY KEY,
+msid varchar2(20) unique,
+mspw varchar2(256),
+msname varchar2(20),
+msemail varchar2(50),
+msemailhash varchar2(64),
+msemailchecked number,
+msaddr varchar2(300),
+mstel VARCHAR2(20),
+msbirth VARCHAR2(20),
+msgender VARCHAR2(20),
+msmaster VARCHAR2(10),
+MSPOSTCODE VARCHAR2(100),
+MSDETAILADDRESS VARCHAR2(100),
+MSEXTRAADDRESS VARCHAR2(100),
+MOLISENSE VARCHAR2(100),
+);
+
+--개인회원 시퀀스
+
+CREATE SEQUENCE MEMBER_SEEKER_SEQ;

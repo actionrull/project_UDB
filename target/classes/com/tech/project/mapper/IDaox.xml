@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tech.project.dao.IDaox">
+	
+	<select id="home" resultType="com.tech.project.dto.NoticeDto">
+		SELECT * FROM (SELECT * FROM NOTIFICATION ORDER BY NREGDATE DESC) <![CDATA[WHERE ROWNUM <=6 ]]> ORDER BY NREGDATE DESC
+	</select>
+	
+	<select id="table2" resultType="com.tech.project.dto.NoticeDto">
+		SELECT NSEQ,NLOCATION,NTITLE,NWRITER,NPAY,NREGDATE FROM NOTIFICATION ORDER BY NREGDATE DESC
+	</select>
+	
+	<select id="content_view" resultType="com.tech.project.dto.NoticeDto">
+		SELECT * FROM NOTIFICATION WHERE NSEQ=#{param1 }
+	</select>
+	
+	<select id="homepremium" resultType="com.tech.project.dto.NoticeDto">
+		SELECT * FROM NOTIFICATION WHERE NPREMIUM='1'
+	</select>
+		
+</mapper>

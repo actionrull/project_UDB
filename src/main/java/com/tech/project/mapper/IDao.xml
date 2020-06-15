@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tech.project.dao.IDao">
+
+	<!--게시판 보기  -->
+	<select  id="table" resultType="com.tech.project.dto.BoardDto">
+		SELECT BID,BNAME,BTITLE,BCONTENT,BDATE,BHIT,BGROUP,BSTEP,BINDENT FROM
+		(SELECT BID,BNAME,BTITLE,BCONTENT,BDATE,BHIT,BGROUP,BSTEP,BINDENT,ROW_NUMBER() 
+		OVER(ORDER BY BGROUP DESC,BSTEP ASC) B_SEQ FROM MVC_BOARD) 
+		WHERE B_SEQ BETWEEN #{param1 } AND #{param2 }
+	</select>
+	
+	<!--글 내용 보기  -->
+	<select id="table_view" resultType="com.tech.project.dto.BoardDto">
+		SELECT * FROM MVC_BOARD WHERE BID=#{param1 }
+	</select>
+	
+	<!--글쓰기  -->
+	<insert id="table_write">
+		INSERT INTO MVC_BOARD(BID,BNAME,BTITLE,BCONTENT,BHIT,BGROUP,BSTEP,BINDENT) 
+		VALUES(MVC_BOARD_SEQ.NEXTVAL,#{param1},#{param2},#{param3},0,MVC_BOARD_SEQ.CURRVAL,0,0)
+	</insert>
+	
+	<!--글 수정  -->
+	<update id="modify">
+		UPDATE MVC_BOARD SET BNAME=#{param2 }, BTITLE=#{param3 }, BCONTENT=#{param4 } WHERE BID=#{param1 }
+	</update>
+	
+	<!--글 삭제  -->
+	<delete id="delete">
+		DELETE FROM MVC_BOARD WHERE BID=#{param1 }
+	</delete>
+	
+	<!--답글 화면  -->
+	<select id="table_reply_view" resultType="com.tech.project.dto.BoardDto">
+		SELECT * FROM MVC_BOARD WHERE BID=#{param1}
+	</select>
+	
+	<!--답글로 분류  -->
+	<update id="stepup">
+		UPDATE MVC_BOARD SET BSTEP=BSTEP+1 WHERE (BGROUP=#{param1 } AND BSTEP>#{param2 })
+	</update>
+	
+	<!--답글 쓰기  -->
+	<insert id="table_reply">
+		INSERT INTO MVC_BOARD(BID,BNAME,BTITLE,BCONTENT,BGROUP,BSTEP,BINDENT) 
+		VALUES(MVC_BOARD_SEQ.NEXTVAL,#{param2 },#{param3 },#{param4 },#{param5 },#{param6 }+1,#{param7 }+1)
+	</insert>
+	
+	<!--페이징을 위한 전체글 수  -->
+	<select id="selectBoardCount" resultType="integer">
+		SELECT COUNT(*) FROM MVC_BOARD
+	</select>
+	
+	<!--조회수 증가  -->
+	<update id="upHit">
+		UPDATE MVC_BOARD SET BHIT=BHIT+1 WHERE BID=#{param1 }
+	</update>	
+</mapper>
